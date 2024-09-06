@@ -1,0 +1,24 @@
+/* Custom styles to complement Tailwind CSS */
+.link-box {
+    transition: all 0.3s ease;
+}
+
+.link-box:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.link-box textarea {
+    resize: vertical;
+}
+
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+}

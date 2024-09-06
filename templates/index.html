@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-8 text-center text-indigo-600">Link Manager</h1>
+        <div class="flex justify-center mb-8 space-x-4">
+            <button id="generateBox" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+                <i data-feather="plus-circle" class="mr-2"></i>
+                Generate Box
+            </button>
+            <button id="exportData" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+                <i data-feather="download" class="mr-2"></i>
+                Export
+            </button>
+            <button id="importData" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+                <i data-feather="upload" class="mr-2"></i>
+                Import
+            </button>
+            <input type="file" id="fileInput" accept=".json" class="hidden">
+        </div>
+        <div id="boxContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Link boxes will be dynamically added here -->
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script>
+        feather.replace();
+    </script>
+</body>
+</html>
