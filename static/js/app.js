@@ -49,8 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
         feather.replace();
 
         // Add event listeners for input and textarea
-        box.querySelector('input').addEventListener('input', saveToLocalStorage);
-        box.querySelector('textarea').addEventListener('input', saveToLocalStorage);
+        box.querySelector('input').addEventListener('input', () => saveToLocalStorage(true));
+        box.querySelector('textarea').addEventListener('input', () => saveToLocalStorage(true));
 
         saveToLocalStorage();
     }
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.copyLinks = (boxId) => {
         const links = document.querySelector(`#${boxId} textarea`).value;
         navigator.clipboard.writeText(links).then(() => {
-            alert('Links copied to clipboard!');
+            showNotification('Links copied to clipboard!');
         });
     };
 
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const result = manipulatedLinks.join('\n');
         navigator.clipboard.writeText(result).then(() => {
-            alert('Manipulated links copied to clipboard!');
+            showNotification('Manipulated links copied to clipboard!');
         });
     };
 
@@ -114,31 +114,77 @@ document.addEventListener('DOMContentLoaded', () => {
                     data.forEach(box => createLinkBox(box.id, box.label, box.links));
                     boxCounter = data.length;
                     saveToLocalStorage(); // Save imported data to localStorage
+                    showNotification('Data imported successfully!');
                 } catch (error) {
-                    alert('Error importing data. Please make sure the file is valid JSON.');
+                    showNotification('Error importing data. Please make sure the file is valid JSON.', 'error');
                 }
             };
             reader.readAsText(file);
         }
     }
 
-    function saveToLocalStorage() {
-        const boxes = document.querySelectorAll('.link-box');
-        const data = Array.from(boxes).map(box => ({
-            id: box.id,
-            label: box.querySelector('input').value,
-            links: box.querySelector('textarea').value
-        }));
-        localStorage.setItem('linkManagerData', JSON.stringify(data));
+    function saveToLocalStorage(debounce = false) {
+        const saveData = () => {
+            try {
+                const boxes = document.querySelectorAll('.link-box');
+                const data = Array.from(boxes).map(box => ({
+                    id: box.id,
+                    label: box.querySelector('input').value,
+                    links: box.querySelector('textarea').value
+                }));
+                localStorage.setItem('linkManagerData', JSON.stringify(data));
+                showNotification('Data saved successfully!');
+            } catch (error) {
+                console.error('Error saving data to localStorage:', error);
+                showNotification('Error saving data. Please try again.', 'error');
+            }
+        };
+
+        if (debounce) {
+            clearTimeout(window.saveTimeout);
+            window.saveTimeout = setTimeout(saveData, 1000); // Debounce for 1 second
+        } else {
+            saveData();
+        }
     }
 
     function loadFromLocalStorage() {
-        const data = localStorage.getItem('linkManagerData');
-        if (data) {
-            const parsedData = JSON.parse(data);
-            boxContainer.innerHTML = ''; // Clear existing boxes
-            parsedData.forEach(box => createLinkBox(box.id, box.label, box.links));
-            boxCounter = parsedData.length;
+        try {
+            const data = localStorage.getItem('linkManagerData');
+            if (data) {
+                const parsedData = JSON.parse(data);
+                boxContainer.innerHTML = ''; // Clear existing boxes
+                parsedData.forEach(box => createLinkBox(box.id, box.label, box.links));
+                boxCounter = parsedData.length;
+                showNotification('Data loaded successfully!');
+            }
+        } catch (error) {
+            console.error('Error loading data from localStorage:', error);
+            showNotification('Error loading saved data. Starting with empty state.', 'error');
         }
     }
+
+    function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.textContent = message;
+        notification.className = `fixed bottom-4 right-4 p-4 rounded-lg text-white ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+        document.body.appendChild(notification);
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    // Add clear all data functionality
+    const clearAllBtn = document.createElement('button');
+    clearAllBtn.textContent = 'Clear All Data';
+    clearAllBtn.className = 'bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded inline-flex items-center ml-4';
+    clearAllBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+            localStorage.removeItem('linkManagerData');
+            boxContainer.innerHTML = '';
+            boxCounter = 0;
+            showNotification('All data cleared successfully!');
+        }
+    });
+    document.querySelector('.flex.justify-center.mb-8.space-x-4').appendChild(clearAllBtn);
 });
