@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const importBtn = document.getElementById('importData');
     const fileInput = document.getElementById('fileInput');
     const boxContainer = document.getElementById('boxContainer');
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
+    const searchResultsList = document.getElementById('searchResultsList');
     let boxCounter = 0;
 
     generateBoxBtn.addEventListener('click', () => {
@@ -25,6 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load data from localStorage when the page loads
     loadFromLocalStorage();
+
+    // Add search functionality
+    searchInput.addEventListener('input', debounce(performSearch, 300));
 
     function createLinkBox(id = null, label = '', links = '') {
         boxCounter++;
@@ -204,4 +210,72 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     document.querySelector('.flex.justify-center.mb-8.space-x-4').appendChild(clearAllBtn);
+
+    // Implement search functionality
+    function performSearch() {
+        const query = searchInput.value.toLowerCase().trim();
+        if (query === '') {
+            searchResults.classList.add('hidden');
+            return;
+        }
+
+        const boxes = document.querySelectorAll('.link-box');
+        const results = [];
+
+        boxes.forEach(box => {
+            const label = box.querySelector('input').value.toLowerCase();
+            const links = box.querySelector('textarea').value.toLowerCase();
+            const boxId = box.id;
+
+            if (label.includes(query) || links.includes(query)) {
+                const matchedLinks = links.split('\n').filter(link => link.includes(query));
+                results.push({ boxId, label, matchedLinks });
+            }
+        });
+
+        displaySearchResults(results);
+    }
+
+    function displaySearchResults(results) {
+        searchResultsList.innerHTML = '';
+        if (results.length === 0) {
+            searchResults.classList.add('hidden');
+            return;
+        }
+
+        results.forEach(result => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <div class="bg-white p-4 rounded-lg shadow">
+                    <h3 class="font-semibold text-lg mb-2">${result.label || 'Untitled Box'}</h3>
+                    <ul class="list-disc list-inside">
+                        ${result.matchedLinks.map(link => `<li>${link}</li>`).join('')}
+                    </ul>
+                    <button onclick="scrollToBox('${result.boxId}')" class="mt-2 text-blue-500 hover:text-blue-700">Go to Box</button>
+                </div>
+            `;
+            searchResultsList.appendChild(li);
+        });
+
+        searchResults.classList.remove('hidden');
+    }
+
+    window.scrollToBox = (boxId) => {
+        const box = document.getElementById(boxId);
+        if (box) {
+            box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            box.classList.add('bg-yellow-100');
+            setTimeout(() => {
+                box.classList.remove('bg-yellow-100');
+            }, 2000);
+        }
+    };
+
+    function debounce(func, delay) {
+        let timeoutId;
+        return function (...args) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
 });

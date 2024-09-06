@@ -27,6 +27,13 @@
             </button>
             <input type="file" id="fileInput" accept=".json" class="hidden">
         </div>
+        <div class="mb-8">
+            <input type="text" id="searchInput" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Search for links...">
+        </div>
+        <div id="searchResults" class="mb-8 hidden">
+            <h2 class="text-xl font-semibold mb-4">Search Results:</h2>
+            <ul id="searchResultsList" class="space-y-2"></ul>
+        </div>
         <div id="boxContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Link boxes will be dynamically added here -->
         </div>
