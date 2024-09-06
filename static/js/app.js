@@ -107,28 +107,36 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'link_manager_data.json';
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        a.download = `link_manager_data_${timestamp}.json`;
         a.click();
         URL.revokeObjectURL(url);
+        showNotification('Data exported successfully!');
     }
 
     function importData(event) {
         const file = event.target.files[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    boxContainer.innerHTML = ''; // Clear existing boxes
-                    data.forEach(box => createLinkBox(box.id, box.label, box.links));
-                    boxCounter = data.length;
-                    saveToLocalStorage(); // Save imported data to localStorage
-                    showNotification('Data imported successfully!');
-                } catch (error) {
-                    showNotification('Error importing data. Please make sure the file is valid JSON.', 'error');
-                }
-            };
-            reader.readAsText(file);
+            if (confirm('Importing data will replace your current link collections. Are you sure you want to proceed?')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        boxContainer.innerHTML = ''; // Clear existing boxes
+                        data.forEach(box => createLinkBox(box.id, box.label, box.links));
+                        boxCounter = data.length;
+                        saveToLocalStorage(); // Save imported data to localStorage
+                        showNotification('Data imported successfully!');
+                    } catch (error) {
+                        console.error('Error importing data:', error);
+                        showNotification('Error importing data. Please make sure the file is valid JSON.', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            } else {
+                // Reset the file input if import is cancelled
+                event.target.value = '';
+            }
         }
     }
 
