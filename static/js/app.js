@@ -14,6 +14,15 @@ document.addEventListener('DOMContentLoaded', () => {
     importBtn.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', importData);
 
+    // Initialize Sortable
+    new Sortable(boxContainer, {
+        animation: 150,
+        ghostClass: 'bg-gray-100',
+        onEnd: () => {
+            saveToLocalStorage();
+        }
+    });
+
     // Load data from localStorage when the page loads
     loadFromLocalStorage();
 
@@ -21,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         boxCounter++;
         const boxId = id || `box-${boxCounter}`;
         const box = document.createElement('div');
-        box.className = 'link-box bg-white p-6 rounded-lg shadow-md';
+        box.className = 'link-box bg-white p-6 rounded-lg shadow-md cursor-move';
         box.id = boxId;
         box.innerHTML = `
             <div class="mb-4">
